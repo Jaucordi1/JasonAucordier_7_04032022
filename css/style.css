@@ -55,8 +55,9 @@ button:focus {
 	cursor : pointer;
 	width: auto;
 }
-.searchbox .dropdown-menu .dropdown-item:hover {
+.searchbox .dropdown-menu .dropdown-item:is(:hover, .active) {
 	color : var(--bs-black);
+	background-color: #e9ecef;
 }
 
 #recipes .card {

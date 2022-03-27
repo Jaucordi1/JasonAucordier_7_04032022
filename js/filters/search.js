@@ -1,4 +1,5 @@
 import { replaceAccentuedChars } from "../utils.js";
+import { filter, map }           from "../utils/array.js";
 
 /**
  * DONE - Don't touch code !
@@ -19,22 +20,29 @@ export class SearchFilter {
     this.onChange = onChange;
     this.term     = "";
     this.filtered = false;
-    this.reduced  = [...app.recipes.all];
+    this.reduced  = map(app.recipes.all, r => r);
+  }
+
+  focus() {
+    this.input.focus();
   }
 
   /**
    * @param {string} value
    */
-  onInputChange(value) {
-    console.debug("[CHANGE] SearchFilter");
-
+  onKeyUp(value) {
     const newTerm = replaceAccentuedChars(value).toLowerCase();
-    console.log(this.term, ">", newTerm);
     if (newTerm === this.term) return;
 
+    console.debug("[CHANGE] Search input");
     this.term = newTerm;
 
-    this.update();
+    if (
+      (this.filtered && this.term.length < 3)
+      || (!this.filtered && this.term.length >= 3)
+    ) {
+      this.update();
+    }
   }
 
   /**
@@ -42,10 +50,11 @@ export class SearchFilter {
    */
   reduce(recipes) {
     console.debug("[REDUCE] SearchFilter");
+
     if (this.term.length < 3) {
-      return [...recipes];
+      return map(recipes, r => r);
     } else {
-      return recipes.filter((recipe) => {
+      return filter(recipes, (recipe) => {
         const name = replaceAccentuedChars(recipe.name.toLowerCase());
         if (name.includes(this.term)) return true;
 
@@ -72,11 +81,9 @@ export class SearchFilter {
     this.filtered = this.term.length >= 3;
     this.reduced  = this.reduce(this.app.recipes.all);
 
-    if (notify) {
-      const hasChanged = this.filtered !== oldFiltered || this.reduced.length !== nbBefore;
-      if (hasChanged) {
-        this.onChange(this);
-      }
+    const hasChanged = this.filtered !== oldFiltered || this.reduced.length !== nbBefore;
+    if (hasChanged && notify) {
+      this.onChange(this);
     }
   }
 
@@ -84,6 +91,6 @@ export class SearchFilter {
     console.debug("[INIT] SearchFilter");
 
     this.reduced = this.reduce(this.app.recipes.all);
-    this.input.addEventListener("keyup", (event) => this.onInputChange(event.target.value));
+    this.input.addEventListener("keyup", (event) => this.onKeyUp(event.target.value));
   }
 }

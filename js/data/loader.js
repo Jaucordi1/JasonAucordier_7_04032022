@@ -3,5 +3,5 @@
  * @return {Promise<IRecipe[]>}
  */
 export async function loadRecipes() {
-  return (await import("./recipes.js")).default.map((recipe) => ({ ...recipe }));
+  return (await import("./recipes.js")).default;
 }

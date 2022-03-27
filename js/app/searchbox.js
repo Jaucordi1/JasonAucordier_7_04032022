@@ -1,5 +1,9 @@
-import { TagsDisplayHelper } from "./tags.js";
+import { TagsDisplayHelper }                              from "./tags.js";
+import { replaceAccentuedChars }                          from "../utils.js";
+import { filter, find, forEach, includes, reduce, split } from "../utils/array.js";
+import { TagType }                                        from "../data/tags.js";
 
+// DONE
 export class SearchboxHelper {
   /**
    * @param {TagsFilter} tagsFilter
@@ -16,9 +20,11 @@ export class SearchboxHelper {
     this.type       = type;
     this.extractor  = extractor;
 
+    /** @type {TagsDisplayHelper} */
     this.tags = new TagsDisplayHelper(this.menu, this.itemFactory.bind(this), this.onTagsChange.bind(this));
 
     this.search         = "";
+    this.opened         = false;
     this.cancelNextHide = false;
   }
 
@@ -26,7 +32,7 @@ export class SearchboxHelper {
    * @param {Tags} tags
    */
   onTagsChange(tags) {
-    // this.update();
+    this.render();
   }
 
   /**
@@ -39,26 +45,43 @@ export class SearchboxHelper {
     item.textContent = tag.label;
 
     item.addEventListener("click", (event) => {
+      console.log("Item clicked");
+
+      event.preventDefault();
+      this.cancelNextHide = true;
+      this.resetInput();
       this.tagsFilter.add(tag);
+    });
+    item.addEventListener("mouseover", (event) => {
+      const activeItem = find(Array.from(this.menu.children), element => element.classList.contains("active"));
+      this.selectItem(activeItem, event.target);
     });
 
     return item;
   }
 
+  resetInput() {
+    this.search      = "";
+    this.input.value = this.search;
+  }
+  focus() {
+    this.input.focus();
+  }
   open() {
+    if (this.opened) return;
     if (this.container.parentElement.classList.contains("col-2")) {
       this.Dropdown.show();
-      this.input.focus();
     }
   }
   close() {
+    if (!this.opened) return;
+    if (this.cancelNextHide) {
+      this.cancelNextHide = false;
+      return;
+    }
     if (!this.container.parentElement.classList.contains("col-2")) {
       this.Dropdown.hide();
     }
-  }
-  setItems(items) {
-    this.menu.innerHTML = "";
-    items.forEach((item) => this.menu.appendChild(item));
   }
   emptyDropdown() {
     this.menu.innerHTML = "";
@@ -70,44 +93,63 @@ export class SearchboxHelper {
     }
     item.classList.add("active");
     item.setAttribute("aria-current", "true");
-    item.scrollIntoView({ behavior: "smooth" });
+    item.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  /**
+   * @param {string} value
+   */
+  onInputChange(value) {
+    const newTerm = replaceAccentuedChars(value).toLowerCase();
+    if (newTerm === this.search) return;
+
+    this.search = newTerm;
+    this.update();
   }
 
   /**
    * @param {IRecipe[]} recipes
+   * @return {Tag[]}
    */
   reduce(recipes) {
-    return recipes.reduce((tags, recipe) => {
-      tags.push(...this.extractor(recipe));
+    console.debug(`[REDUCE] (${this.type}) SearchboxHelper`);
+
+    const reducer = (tags, recipe) => {
+      forEach(this.extractor(recipe), t => tags.push(t));
       return tags;
-    }, /** @type {Tag[]} */[]);
+    };
+    const tags    = reduce(recipes, reducer, /** @type {Tag[]} */[]);
+
+    return filter(tags, (tag) => {
+      return tag.value.startsWith(this.search)
+             || tag.value.endsWith(this.search)
+             || tag.value.includes(this.search);
+    });
   }
   update() {
-    console.debug("[UPDATE] SearchboxHelper");
+    console.debug(`[UPDATE] (${this.type}) SearchboxHelper`);
+
     const tags = this.reduce(this.tagsFilter.reduced);
-    this.tags.setTags(tags, false);
+    this.tags.setTags(tags, false, false);
     this.render();
   }
   render() {
-    console.debug("[RENDER] SearchboxHelper");
+    console.debug(`[RENDER] (${this.type}) SearchboxHelper`);
+
     const tags     = this.tags.list;
     const maxItems = 30;
 
     this.emptyDropdown();
+    /* TODO Choose between functional OR native loops
+     * while & .shift()
+     */
     while (tags.length > 0 && this.menu.childElementCount < maxItems) {
       const tag  = tags.shift();
-      const item = document.createElement("li");
-      item.classList.add("dropdown-item");
-      item.textContent = tag.label;
-
-      item.addEventListener("click", (event) => {
-        this.tagsFilter.add(tag);
-        // TODO Maybe this.update() ?
-      });
-
+      const item = this.itemFactory(tag);
       this.menu.appendChild(item);
     }
   }
+
   init() {
     console.debug(`[INIT] (${this.type}) SearchboxHelper`);
 
@@ -115,32 +157,38 @@ export class SearchboxHelper {
 
     this.button.addEventListener("hide.bs.dropdown", (event) => {
       if (this.cancelNextHide) {
-        event.preventDefault();
         this.cancelNextHide = false;
+        event.preventDefault();
       } else {
-        this.container.parentElement.classList.remove("col-8");
-        this.container.parentElement.classList.add("col-2");
+        this.focus();
       }
     });
-    this.button.addEventListener("show.bs.dropdown", () => {
+    this.button.addEventListener("hidden.bs.dropdown", () => {
+      this.opened = false;
+      this.container.parentElement.classList.remove("col-8");
+      this.container.parentElement.classList.add("col-2");
+    });
+    this.button.addEventListener("shown.bs.dropdown", () => {
+      this.opened = true;
+
       if (this.container.parentElement.classList.contains("col-2")) {
         this.container.parentElement.classList.remove("col-2");
         this.container.parentElement.classList.add("col-8");
       }
+
+      this.focus();
+    });
+    this.button.addEventListener("click", () => {
+      if (!this.opened) {
+        this.cancelNextHide = true;
+      }
     });
 
     // Search & Arrows navigation
-    this.input.addEventListener("focus", (event) => {
-      this.cancelNextHide = true;
-      this.open();
-    });
-    this.input.addEventListener("click", (event) => {
-      this.cancelNextHide = true;
-      this.open();
-      this.input.focus();
-    });
-    this.input.addEventListener("blur", (event) => {
-      this.cancelNextHide = false;
+    this.input.addEventListener("click", () => {
+      if (this.opened) {
+        this.cancelNextHide = true;
+      }
     });
     this.input.addEventListener("keydown", (event) => {
       const { code } = event;
@@ -152,51 +200,75 @@ export class SearchboxHelper {
 
       switch (code) {
         case "ArrowDown":
-          if (!noItems) {
-            this.selectItem(activeItem, (nextItem || this.menu.firstElementChild));
+          if (noItems) {
+            this.close();
+            break;
           }
+          this.open();
+          this.selectItem(activeItem, (nextItem || this.menu.firstElementChild));
           break;
         case "ArrowUp":
-          if (!noItems) {
-            this.selectItem(activeItem, (previousItem || this.menu.lastElementChild));
+          if (noItems) {
+            this.close();
+            break;
+          }
+          this.open();
+          this.selectItem(activeItem, (previousItem || this.menu.lastElementChild));
+          break;
+        case "Escape":
+          event.preventDefault();
+          this.close();
+          break;
+        case "Tab":
+          const nextSearchboxEl = event.shiftKey
+                                  ? this.container.parentElement.previousElementSibling?.firstElementChild
+                                  : this.container.parentElement.nextElementSibling?.firstElementChild;
+          if (nextSearchboxEl) {
+            // Focusing next (or previous) searchbox
+            event.preventDefault();
+            const type = split(nextSearchboxEl.id, "-")[1];
+            if (includes(Object.values(TagType), type)) {
+              this.tagsFilter.app.searchboxes[/** @type {TagType} */type].focus();
+            }
+          } else if (event.shiftKey) {
+            // Focusing search filter input because no previous searchbox
+            event.preventDefault();
+            this.tagsFilter.app.search.focus();
+          } else {
+            // Focus first recipe found in list
+            if (this.tagsFilter.app.recipes.displayed.length > 0) {
+              event.preventDefault();
+            }
+            this.tagsFilter.app.recipes.helper.focusFirst();
           }
           break;
         default:
-          break;
+          return;
       }
-
-      this.open();
-      this.input.focus();
     });
     this.input.addEventListener("keyup", (event) => {
       const { code, target } = event;
-
-      // Refresh search term
-      this.search = target.value;
 
       const activeItem = this.menu.querySelector(".active");
       switch (code) {
         case "ArrowUp":
         case "ArrowDown":
-          break;
+          return;
         case "Enter":
           if (!activeItem) break;
+          // Select active item
           activeItem.click();
           break;
         default:
-          this.emptyDropdown();
-          this.setupDropdownItems(this.menu, this.items.filter((str) => {
-            const candidate = str.toLowerCase();
-            const reference = this.search.toLowerCase();
-            return candidate.startsWith(reference)
-                   || candidate.endsWith(reference)
-                   || candidate.includes(reference);
-          }));
-          break;
+          this.onInputChange(target.value);
+          return;
       }
 
       this.open();
-      this.input.focus();
+    });
+    this.input.addEventListener("blur", () => {
+      this.close();
+      this.resetInput();
     });
 
     this.update();
