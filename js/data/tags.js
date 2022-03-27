@@ -1,4 +1,5 @@
-import { replaceAccentuedChars } from "../utils.js";
+import { replaceAccentuedChars }                 from "../utils.js";
+import { find, findIndex, forEach, map, splice } from "../utils/array.js";
 
 // DONE
 export const TagType = Object.seal(Object.freeze({
@@ -76,7 +77,6 @@ export class Tags {
     /** @type {Tag[]} */
     this._list = [];
   }
-
   /**
    * @return {number}
    */
@@ -87,20 +87,22 @@ export class Tags {
    * @return {Tag[]}
    */
   get list() {
-    return [...this._list];
+    return map(this._list, t => t);
   }
-
+  notify() {
+    if (this.onChange) {
+      this.onChange(this);
+    }
+  }
   /**
    * @param {Tag} tag
    * @param {boolean} notify
    */
   add(tag, notify = true) {
-    const found = this._list.find((candidate) => candidate.type === tag.type && candidate.value === tag.value);
+    const found = find(this._list, (candidate) => candidate.isEqual(tag));
     if (!found) {
       this._list.push(tag);
-      if (notify && this.onChange) {
-        this.onChange(this);
-      }
+      if (notify) this.notify();
     }
   }
 
@@ -109,10 +111,8 @@ export class Tags {
    * @param {boolean} notify
    */
   addMultiple(tags, notify = true) {
-    tags.forEach((tag) => this.add(tag, false));
-    if (notify) {
-      this.onChange(this);
-    }
+    forEach(tags, (tag) => this.add(tag, false));
+    if (notify) this.notify();
   }
 
   /**
@@ -120,12 +120,10 @@ export class Tags {
    * @param {boolean} notify
    */
   remove(tag, notify = true) {
-    const tagIdx = this.list.findIndex((candidate) => candidate.isEqual(tag));
+    const tagIdx = findIndex(this._list, (candidate) => candidate.isEqual(tag));
     if (tagIdx > -1) {
-      this.list.splice(tagIdx, 1);
-      if (notify && this.onChange) {
-        this.onChange(this);
-      }
+      splice(this._list, tagIdx, 1);
+      if (notify) this.notify();
     }
   }
 
@@ -134,9 +132,7 @@ export class Tags {
    */
   clear(notify = true) {
     this._list = [];
-    if (notify && this.onChange) {
-      this.onChange(this);
-    }
+    if (notify) this.notify();
   }
 
   /**
@@ -144,6 +140,7 @@ export class Tags {
    * @param {boolean} notify
    */
   setTags(tags, notify = true) {
+    this.clear(false);
     this.addMultiple(tags, notify);
   }
 }

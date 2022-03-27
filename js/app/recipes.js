@@ -1,68 +1,134 @@
-import { recipeFactory } from "../factories/card.js";
-import { loadRecipes }   from "../data/loader.js";
+import { findIndex }     from "../utils/array.js";
+import { RecipesFilter } from "../filters/recipes.js";
+import { TagType }       from "../data/tags.js";
 
 export class RecipesHelper {
   /**
-   * @param {App} app
+   * @param {RecipesFilter} recipesFilter
    * @param {HTMLElement} container
    */
-  constructor(app, container) {
-    this.app       = app;
+  constructor(recipesFilter, container) {
+    this.filter    = recipesFilter;
     this.container = container;
 
-    /**
-     * @type {IRecipe[]}
-     */
-    this.all = [];
-
-    /**
-     * @type {IRecipe[]}
-     */
-    this.displayed = [];
-
-    /**
-     * @type {boolean}
-     */
-    this.filtered = false;
+    /** @type {Recipe | undefined} */
+    this._focusedRecipe = undefined;
+    /** @type {number | undefined} */
+    this._focusedRecipeIdx = undefined;
   }
 
-  get allIngredients() {
-    return this.all.reduce((ingredients, recipe) => {
-      recipe.ingredients.forEach(({ ingredient }) => ingredients.push(ingredient));
-      return ingredients;
-    }, []);
-  }
-  get allUstensils() {
-    return this.all.reduce((ustensils, recipe) => {
-      recipe.ustensils.forEach((ustensil) => ustensils.push(ustensil));
-      return ustensils;
-    }, []);
-  }
-  get allAppliance() {
-    return this.all.map(({ appliance }) => appliance);
+  /**
+   * @returns {HTMLElement | null}
+   */
+  get focusedRecipeEl() {
+    if (this._focusedRecipeIdx === undefined) return undefined;
+    return this.container.children.item(this._focusedRecipeIdx);
   }
 
-  update() {
-    console.debug("[UPDATE] RecipesHelper");
-    const nbBefore    = this.displayed.length;
-    const oldFiltered = this.filtered;
-
-    this.filtered = this.app.tags.filtered || this.app.search.filtered;
-
-    // Getting displayed recipes from last reducer in chain
-    this.displayed = [...this.app.tags.reduced];
-
-    const hasChanged = this.filtered !== oldFiltered || this.displayed.length !== nbBefore;
-    if (hasChanged) this.render();
-  }
-  render() {
-    console.debug("[RENDER] RecipesHelper");
-    this.container.innerHTML = "";
-    this.container.append(...this.displayed.map((recipe) => recipeFactory(recipe).getRecipeCardDOM()));
+  /**
+   * @param {Recipe} recipe
+   * @returns {number}
+   */
+  recipeIndexFinder(recipe) {
+    findIndex(this.filter.displayed, (candidate) => candidate.isEqual(recipe));
   }
 
-  async init() {
-    console.debug("[INIT] RecipesHelper");
-    this.all = await loadRecipes();
+  /**
+   * @param {number | undefined} oldIndex
+   */
+  onIndexChange(oldIndex) {
+    console.debug("[CHANGE] RecipesHelper focused index :", oldIndex, ">", this._focusedRecipeIdx);
+
+    const oldFocusedRecipe = this._focusedRecipe;
+
+    this._focusedRecipe = (this._focusedRecipeIdx !== undefined)
+                          ? this.filter.displayed[this._focusedRecipeIdx]
+                          : undefined;
+
+    const elementChanged = this._focusedRecipe !== oldFocusedRecipe || this._focusedRecipeIdx !== oldIndex;
+    if (elementChanged) {
+      const recipeColEl = this.container.children.item(this._focusedRecipeIdx);
+      if (recipeColEl) {
+        const recipeEl = recipeColEl.firstElementChild;
+        recipeEl.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "nearest",
+        });
+        recipeEl.focus();
+        // TODO ? setTimeout(() => recipeEl.focus(), 250);
+      }
+    }
+  }
+
+  clearFocus() {
+    const oldIdx = this._focusedRecipeIdx;
+    this._focusedRecipeIdx = undefined;
+    this.onIndexChange(oldIdx);
+  }
+
+  focusFirst() {
+    console.debug("[FOCUS] First");
+
+    const oldIdx           = this._focusedRecipeIdx;
+    this._focusedRecipeIdx = 0;
+    this.onIndexChange(oldIdx);
+  }
+  focusLast() {
+    console.debug("[FOCUS] Last");
+
+    const oldIdx           = this._focusedRecipeIdx;
+    this._focusedRecipeIdx = this.filter.displayed.length - 1;
+    this.onIndexChange(oldIdx);
+  }
+
+  focusNext() {
+    console.debug("[FOCUS] Next");
+
+    const oldIdx = this._focusedRecipeIdx;
+
+    // Nothing focused
+    if (!this._focusedRecipe) {
+      // Nothing to focus
+      if (this.filter.displayed.length < 1) {
+        return;
+      } else {
+        this._focusedRecipeIdx = 0;
+      } // Focus first
+    } else {
+      // Unfocus if last recipe
+      if (this._focusedRecipeIdx === this.filter.displayed.length - 1) {
+        this._focusedRecipeIdx = undefined;
+      } else {
+        this._focusedRecipeIdx++;
+      } // Set to next idx
+    }
+
+    this.onIndexChange(oldIdx);
+  }
+  focusPrevious() {
+    console.debug("[FOCUS] Previous");
+
+    const oldIdx = this._focusedRecipeIdx;
+
+    // No recipe focused
+    if (!this._focusedRecipe) {
+      // Nothing to focus
+      if (this.filter.displayed.length < 1) {
+        return;
+      } else {
+        this._focusedRecipeIdx = this.filter.displayed.length - 1;
+      } // Focus last
+    } else {
+      // Focus last searchbox if first recipe
+      if (this._focusedRecipeIdx === 0) {
+        this._focusedRecipeIdx = undefined;
+        Object.values(this.filter.app.searchboxes)[Object.values(TagType).length - 1].focus();
+      } else {
+        this._focusedRecipeIdx--;
+      } // Set to previous idx
+    } // A recipe is focused
+
+    this.onIndexChange(oldIdx);
   }
 }

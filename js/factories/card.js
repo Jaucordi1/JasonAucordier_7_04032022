@@ -1,3 +1,6 @@
+import { join, filter } from "../utils/array.js";
+
+// DONE
 export function recipeFactory(recipe) {
   function getCardImgDOM() {
     const imgEl = document.createElement("img");
@@ -44,10 +47,10 @@ export function recipeFactory(recipe) {
     ingredientNameEl.textContent = `${name}${ingredientQuantity !== undefined ? ": " : ""}`;
 
     const quantityEl       = document.createElement("span");
-    quantityEl.textContent = [
+    quantityEl.textContent = join(filter([
       ingredientQuantity?.toString(10),
       unit
-    ].filter((v) => !!v).join(" ");
+    ], (v) => !!v), " ");
 
     const itemEl = document.createElement("li");
     // itemEl.classList.add("list-group-item");
@@ -104,6 +107,7 @@ export function recipeFactory(recipe) {
   }
   function getCardDOM() {
     const cardEl = document.createElement("div");
+    cardEl.setAttribute("tabindex", "0");
     cardEl.classList.add("card");
 
     return cardEl;

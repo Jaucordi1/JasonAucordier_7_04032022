@@ -1,5 +1,6 @@
 import { TagFactory }        from "../factories/tags.js";
 import { TagsDisplayHelper } from "../app/tags.js";
+import { filter, map }       from "../utils/array.js";
 
 export class TagsFilter {
   /**
@@ -12,7 +13,7 @@ export class TagsFilter {
     this.container = container;
     this.onChange  = onChange;
 
-    this.tagsDisplayHelper = new TagsDisplayHelper(container, TagFactory.getTagDOM, this.update.bind(this));
+    this.tagsDisplayHelper = new TagsDisplayHelper(container, this.tagFactory.bind(this), this.update.bind(this));
 
     /** @type {IRecipe[]} */
     this.reduced = [];
@@ -21,20 +22,26 @@ export class TagsFilter {
 
   /**
    * @param {Tag} tag
+   * @return {HTMLButtonElement}
+   */
+  tagFactory(tag) {
+    const tagEl = TagFactory.getTagDOM(tag);
+    tagEl.addEventListener("click", (event) => this.remove(tag));
+    return tagEl;
+  }
+
+  /**
+   * @param {Tag} tag
    */
   add(tag) {
-    console.debug("Adding tag to filter");
     this.tagsDisplayHelper.add(tag);
-    this.update();
   }
 
   /**
    * @param {Tag} tag
    */
   remove(tag) {
-    console.debug("Remove tag from filter");
     this.tagsDisplayHelper.remove(tag);
-    this.update();
   }
 
   /**
@@ -44,17 +51,17 @@ export class TagsFilter {
   reduce(recipes) {
     console.debug("[REDUCE] TagsFilter");
 
-    if (this.tagsDisplayHelper.tags.count === 0) return [...recipes];
+    if (this.tagsDisplayHelper.tags.count === 0) return map(recipes, r => r);
 
     const tags = this.tagsDisplayHelper.tags.list;
-    return recipes.filter((recipe) => tags.some((tag) => tag.describeRecipe(recipe)));
+    return filter(recipes, (recipe) => tags.some((tag) => tag.describeRecipe(recipe)));
   }
 
   update() {
     console.debug("[UPDATE] TagsFilter");
 
     const oldFiltered = this.filtered;
-    const nbBefore = this.reduced.length;
+    const nbBefore    = this.reduced.length;
 
     this.reduced  = this.reduce(this.app.search.reduced);
     this.filtered = this.app.search.reduced.length !== this.reduced.length;
@@ -67,6 +74,6 @@ export class TagsFilter {
   init() {
     console.debug("[INIT] TagsFilter");
 
-    this.reduced = [...this.app.search.reduced];
+    this.reduced = map(this.app.search.reduced, r => r);
   }
 }

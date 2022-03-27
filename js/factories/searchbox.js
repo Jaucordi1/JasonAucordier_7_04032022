@@ -1,3 +1,4 @@
+// DONE
 class SearchboxFactory {
   /**
    * @param {string} label
