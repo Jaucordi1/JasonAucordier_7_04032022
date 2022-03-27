@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<!-- Bootstrap CSS -->
+		<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+		      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" rel="stylesheet" />
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
+
+		<!-- Custom CSS -->
+		<link href="css/style.css" rel="stylesheet">
+
+		<title>Algo</title>
+	</head>
+	<body>
+		<header class="text-center mt-5 mb-3">
+			<img alt="Les petits plats" src="img/logo.svg" />
+		</header>
+
+		<main class="container-lg">
+			<form id="filters">
+				<div id="search" class="row">
+					<div class="col">
+						<div class="input-group mb-3">
+							<input type="text" autofocus class="form-control form-control-lg" aria-describedby="button-addon2"
+							       aria-label="Rechercher une recette" placeholder="Rechercher une recette">
+							<span class="input-group-text"><i class="bi-search"></i></span>
+						</div>
+					</div>
+				</div>
+				<div id="tags" class="d-flex flex-wrap gap-2 mb-3"></div>
+				<div id="dropdowns" class="row">
+					<div class="col-2">
+						<!-- DROPDOWN -->
+						<div class="searchbox" id="searchbox-ingredients">
+							<div class="input-group bg-primary rounded px-0 mb-3">
+								<input type="search" class="form-control" aria-label="Ingrédients" placeholder="Ingrédients" />
+								<button class="btn btn-primary btn-lg dropdown-toggle" type="button" aria-expanded="false"
+								        data-bs-toggle="dropdown" data-bs-auto-close="true"></button>
+								<ul class="dropdown-menu dropdown-menu-end bg-primary"></ul>
+							</div>
+						</div>
+					</div>
+					<div class="col-2">
+						<!-- DROPDOWN -->
+						<div class="searchbox" id="searchbox-appliance">
+							<div class="input-group bg-success rounded px-0 mb-3">
+								<input type="search" class="form-control" aria-label="Appareils" placeholder="Appareils" />
+								<button class="btn btn-success btn-lg dropdown-toggle" type="button" aria-expanded="false"
+								        data-bs-toggle="dropdown" data-bs-auto-close="true"></button>
+								<ul class="dropdown-menu dropdown-menu-end bg-success"></ul>
+							</div>
+						</div>
+					</div>
+					<div class="col-2">
+						<!-- DROPDOWN -->
+						<div class="searchbox" id="searchbox-ustensils">
+							<div class="input-group bg-danger rounded px-0 mb-3">
+								<input type="search" class="form-control" aria-label="Ustensiles" placeholder="Ustensiles" />
+								<button class="btn btn-danger btn-lg dropdown-toggle" type="button" aria-expanded="false"
+								        data-bs-toggle="dropdown" data-bs-auto-close="true"></button>
+								<ul class="dropdown-menu dropdown-menu-end bg-danger"></ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+			<div id="recipes" class="row row-cols-1 row-cols-md-3 g-5 mb-5"></div>
+		</main>
+
+		<script crossorigin="anonymous" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"
+		        src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+		<script crossorigin="anonymous" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
+		        src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+
+		<script type="module" src="js/main.js"></script>
+	</body>
+</html>
