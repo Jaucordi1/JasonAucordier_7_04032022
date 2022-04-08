@@ -66,6 +66,10 @@ export class RecipesFilter {
   render() {
     this.clear();
 
+    if (this.displayed.length === 0) {
+      // TODO Display "Aucune recette ne correspond à votre critère"
+    }
+
     forEach(this.displayed, (recipe, idx) => {
       const recipeColEl = recipeFactory(recipe).getRecipeCardDOM();
       const recipeEl    = recipeColEl.firstElementChild;
