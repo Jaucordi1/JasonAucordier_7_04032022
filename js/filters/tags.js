@@ -1,6 +1,6 @@
 import { TagFactory }        from "../factories/tags.js";
-import { TagsDisplayHelper } from "../app/tags.js";
-import { filter, map, some } from "../utils/array.js";
+import { TagsDisplayHelper }        from "../app/tags.js";
+import { every, filter, map } from "../utils/array.js";
 
 export class TagsFilter {
   /**
@@ -52,7 +52,9 @@ export class TagsFilter {
     if (this.tagsDisplayHelper.tags.count === 0) return map(recipes, r => r);
 
     const tags = this.tagsDisplayHelper.tags.list;
-    return filter(recipes, (recipe) => some(tags, (tag) => tag.describeRecipe(recipe)));
+    // Using "every" here to only keep recipes that matches "ALL" active tags
+    // If you want to keep recipes that matches "AT LEAST 1" active tag, use "some" instead.
+    return filter(recipes, (recipe) => every(tags, (tag) => tag.describeRecipe(recipe)));
   }
 
   update() {
