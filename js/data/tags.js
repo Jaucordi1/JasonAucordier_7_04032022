@@ -53,8 +53,10 @@ export class Tag {
           return term === this.value;
         });
       case TagType.APPLIANCE:
-        return recipe.appliance === this.value;
+        const term = replaceAccentuedChars(recipe.appliance).toLowerCase();
+        return term === this.value;
       default:
+        console.debug("[Tag] Unknown type on describeRecipe call", this, recipe);
         return false;
     }
   }
