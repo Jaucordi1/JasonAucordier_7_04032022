@@ -100,7 +100,10 @@ class SearchboxHelper {
    */
   onInputChange(value) {
     const newTerm = replaceAccentuedChars(value).toLowerCase();
-    if (newTerm === this.search) return;
+    if (newTerm === this.search && value.length > 0) return;
+    if (value.length === 0) {
+      this.close();
+    }
 
     this.search = newTerm;
     this.update();
