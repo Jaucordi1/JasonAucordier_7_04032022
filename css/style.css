@@ -1,3 +1,9 @@
+*::placeholder,
+#recipes,
+body > header {
+	user-select: none;
+}
+
 .search-dropdown {
 
 }
