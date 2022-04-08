@@ -2,14 +2,10 @@ import { RecipesFilter }         from "../filters/recipes.js";
 import { SearchFilter }          from "../filters/search.js";
 import { TagsFilter }            from "../filters/tags.js";
 import { Tag, TagType }          from "../data/tags.js";
-import { SearchboxHelper }       from "./searchbox.js";
+import createSearchbox           from "./searchbox.js";
 import { forEach, map }          from "../utils/array.js";
 import { replaceAccentuedChars } from "../utils/strings.js";
 
-/**
- * App constructor
- * @class App
- */
 class App {
   constructor() {
     /** @type {RecipesFilter} */
@@ -23,18 +19,33 @@ class App {
 
     /** @type {{ [key: TagType]: SearchboxHelper }} */
     this.searchboxes = {
-      [TagType.INGREDIENT]: new SearchboxHelper(this.tags, document.getElementById("searchbox-ingredients"), TagType.INGREDIENT, (recipe) => {
-        return map(recipe.ingredients, ({ ingredient }) => {
-          return new Tag(TagType.INGREDIENT, ingredient, replaceAccentuedChars(ingredient).toLowerCase());
-        });
+      [TagType.INGREDIENT]: createSearchbox({
+        type: TagType.INGREDIENT,
+        container: document.getElementById("searchbox-ingredients"),
+        tagsFilter: this.tags,
+        extractor: (recipe) => {
+          return map(recipe.ingredients, ({ ingredient }) => {
+            return new Tag(TagType.INGREDIENT, ingredient, replaceAccentuedChars(ingredient).toLowerCase());
+          });
+        },
       }),
-      [TagType.APPLIANCE]: new SearchboxHelper(this.tags, document.getElementById("searchbox-appliance"), TagType.APPLIANCE, (recipe) => {
-        return [new Tag(TagType.APPLIANCE, recipe.appliance, replaceAccentuedChars(recipe.appliance).toLowerCase())];
+      [TagType.APPLIANCE]: createSearchbox({
+        type: TagType.APPLIANCE,
+        extractor: (recipe) => {
+          return [new Tag(TagType.APPLIANCE, recipe.appliance, replaceAccentuedChars(recipe.appliance).toLowerCase())];
+        },
+        tagsFilter: this.tags,
+        container: document.getElementById("searchbox-appliance"),
       }),
-      [TagType.USTENSIL]: new SearchboxHelper(this.tags, document.getElementById("searchbox-ustensils"), TagType.USTENSIL, (recipe) => {
-        return map(recipe.ustensils, (ustensil) => {
-          return new Tag(TagType.USTENSIL, ustensil, replaceAccentuedChars(ustensil).toLowerCase());
-        });
+      [TagType.USTENSIL]: createSearchbox({
+        type: TagType.USTENSIL,
+        container: document.getElementById("searchbox-ustensils"),
+        extractor: (recipe) => {
+          return map(recipe.ustensils, (ustensil) => {
+            return new Tag(TagType.USTENSIL, ustensil, replaceAccentuedChars(ustensil).toLowerCase());
+          });
+        },
+        tagsFilter: this.tags,
       }),
     };
   }
@@ -59,17 +70,18 @@ class App {
   }
 
   updateSearchboxes() {
-    console.debug("[APP][UPDATE] Searchbox helpers…");
+    console.debug("[APP][UPDATE] Searchbox helpers :", this.searchboxes);
+
     forEach(Object.values(TagType), (type) => this.searchboxes[type].update());
   }
 
   init() {
-    console.debug("[INIT] App");
+    console.debug("[INIT] Index");
 
     // Init recipes helper
     this.recipes.init()
       .then(() => {
-        console.info("[App]", "Loaded", this.recipes.all.length, "recipes.");
+        console.info("[Index]", "Loaded", this.recipes.all.length, "recipes.");
 
         // Init search filter
         this.search.init();
@@ -80,9 +92,9 @@ class App {
 
         this.recipes.update();
 
-        console.info("[App] Available.");
+        console.info("[Index] Available.");
       })
-      .catch((err) => console.error("[ERROR] App :", err));
+      .catch((err) => console.error("[ERROR] Index :", err));
   }
 }
 

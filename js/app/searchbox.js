@@ -3,8 +3,7 @@ import { replaceAccentuedChars }                                     from "../ut
 import { filter, find, findIndex, forEach, includes, reduce, split } from "../utils/array.js";
 import { TagType }                                                   from "../data/tags.js";
 
-// DONE
-export class SearchboxHelper {
+class SearchboxHelper {
   /**
    * @param {TagsFilter} tagsFilter
    * @param {HTMLElement} container
@@ -276,3 +275,18 @@ export class SearchboxHelper {
     this.update();
   }
 }
+
+/**
+ * @param {{
+ *   type: TagType,
+ *   tagsFilter: TagsFilter,
+ *   extractor: (recipe: IRecipe) => Tag[],
+ *   container: HTMLElement
+ * }} data
+ * @return {SearchboxHelper}
+ */
+const createSearchbox = (data) => {
+  return new SearchboxHelper(data.tagsFilter, data.container, data.type, data.extractor);
+};
+
+export default createSearchbox;
