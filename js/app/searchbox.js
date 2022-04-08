@@ -245,7 +245,8 @@ class SearchboxHelper {
           }
           break;
         default:
-          this.open();
+          if (!event.shiftKey && !event.ctrlKey && !event.altKey && code !== "Backspace" && code !== "ArrowLeft" && code !== "ArrowRight")
+            this.open();
           return;
       }
     });
