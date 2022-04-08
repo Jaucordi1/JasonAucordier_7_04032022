@@ -37,8 +37,6 @@ export class RecipesHelper {
    * @param {number | undefined} oldIndex
    */
   onIndexChange(oldIndex) {
-    console.debug("[CHANGE] RecipesHelper focused index :", oldIndex, ">", this._focusedRecipeIdx);
-
     const oldFocusedRecipe = this._focusedRecipe;
 
     this._focusedRecipe = (this._focusedRecipeIdx !== undefined)
@@ -68,23 +66,17 @@ export class RecipesHelper {
   }
 
   focusFirst() {
-    console.debug("[FOCUS] First");
-
     const oldIdx           = this._focusedRecipeIdx;
     this._focusedRecipeIdx = 0;
     this.onIndexChange(oldIdx);
   }
   focusLast() {
-    console.debug("[FOCUS] Last");
-
     const oldIdx           = this._focusedRecipeIdx;
     this._focusedRecipeIdx = this.filter.displayed.length - 1;
     this.onIndexChange(oldIdx);
   }
 
   focusNext() {
-    console.debug("[FOCUS] Next");
-
     const oldIdx = this._focusedRecipeIdx;
 
     // Nothing focused
@@ -107,8 +99,6 @@ export class RecipesHelper {
     this.onIndexChange(oldIdx);
   }
   focusPrevious() {
-    console.debug("[FOCUS] Previous");
-
     const oldIdx = this._focusedRecipeIdx;
 
     // No recipe focused

@@ -1,5 +1,5 @@
-import { replaceAccentuedChars } from "../utils.js";
-import { filter, map }           from "../utils/array.js";
+import { replaceAccentuedChars } from "../utils/strings.js";
+import { filter, map, some }     from "../utils/array.js";
 
 /**
  * DONE - Don't touch code !
@@ -34,7 +34,6 @@ export class SearchFilter {
     const newTerm = replaceAccentuedChars(value).toLowerCase();
     if (newTerm === this.term) return;
 
-    console.debug("[CHANGE] Search input");
     this.term = newTerm;
 
     if (
@@ -49,8 +48,6 @@ export class SearchFilter {
    * @param {IRecipe[]} recipes
    */
   reduce(recipes) {
-    console.debug("[REDUCE] SearchFilter");
-
     if (this.term.length < 3) {
       return map(recipes, r => r);
     } else {
@@ -61,7 +58,7 @@ export class SearchFilter {
         const description = replaceAccentuedChars(recipe.description.toLowerCase());
         if (description.includes(this.term)) return true;
 
-        return recipe.ingredients.some(({ ingredient }) => {
+        return some(recipe.ingredients, ({ ingredient }) => {
           const name = replaceAccentuedChars(ingredient.toLowerCase());
           return name.includes(this.term);
         });
@@ -73,8 +70,6 @@ export class SearchFilter {
    * @param {boolean} notify
    */
   update(notify = true) {
-    console.debug("[UPDATE] SearchFilter");
-
     const oldFiltered = this.filtered;
     const nbBefore    = this.reduced.length;
 
@@ -88,8 +83,6 @@ export class SearchFilter {
   }
 
   init() {
-    console.debug("[INIT] SearchFilter");
-
     this.reduced = this.reduce(this.app.recipes.all);
     this.input.addEventListener("keyup", (event) => this.onKeyUp(event.target.value));
   }

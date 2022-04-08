@@ -1,7 +1,7 @@
-import { TagsDisplayHelper }                              from "./tags.js";
-import { replaceAccentuedChars }                          from "../utils.js";
-import { filter, find, forEach, includes, reduce, split } from "../utils/array.js";
-import { TagType }                                        from "../data/tags.js";
+import { TagsDisplayHelper }                                         from "./tags.js";
+import { replaceAccentuedChars }                                     from "../utils/strings.js";
+import { filter, find, findIndex, forEach, includes, reduce, split } from "../utils/array.js";
+import { TagType }                                                   from "../data/tags.js";
 
 // DONE
 export class SearchboxHelper {
@@ -32,7 +32,7 @@ export class SearchboxHelper {
    * @param {Tags} tags
    */
   onTagsChange(tags) {
-    this.render();
+    this.update();
   }
 
   /**
@@ -45,8 +45,6 @@ export class SearchboxHelper {
     item.textContent = tag.label;
 
     item.addEventListener("click", (event) => {
-      console.log("Item clicked");
-
       event.preventDefault();
       this.cancelNextHide = true;
       this.resetInput();
@@ -55,6 +53,9 @@ export class SearchboxHelper {
     item.addEventListener("mouseover", (event) => {
       const activeItem = find(Array.from(this.menu.children), element => element.classList.contains("active"));
       this.selectItem(activeItem, event.target);
+
+      // Prevent next hide for letting user add a tag by "clicking" it
+      this.cancelNextHide = true;
     });
 
     return item;
@@ -69,9 +70,7 @@ export class SearchboxHelper {
   }
   open() {
     if (this.opened) return;
-    if (this.container.parentElement.classList.contains("col-2")) {
-      this.Dropdown.show();
-    }
+    this.Dropdown.show();
   }
   close() {
     if (!this.opened) return;
@@ -112,53 +111,53 @@ export class SearchboxHelper {
    * @return {Tag[]}
    */
   reduce(recipes) {
-    console.debug(`[REDUCE] (${this.type}) SearchboxHelper`);
-
     const reducer = (tags, recipe) => {
       forEach(this.extractor(recipe), t => tags.push(t));
       return tags;
     };
     const tags    = reduce(recipes, reducer, /** @type {Tag[]} */[]);
 
-    return filter(tags, (tag) => {
+    const searchFilter        = (tag) => {
       return tag.value.startsWith(this.search)
              || tag.value.endsWith(this.search)
              || tag.value.includes(this.search);
-    });
+    };
+    const effectiveTagsFilter = (tag) => {
+      const finder   = (t) => t.value === tag.value;
+      const foundIdx = findIndex(this.tagsFilter.tagsDisplayHelper.list, finder);
+      return foundIdx === -1;
+    };
+    const effectiveTagsCount  = this.tagsFilter.tagsDisplayHelper.count;
+
+    return effectiveTagsCount > 0
+           ? filter(filter(tags, searchFilter), effectiveTagsFilter)
+           : filter(tags, searchFilter);
   }
   update() {
-    console.debug(`[UPDATE] (${this.type}) SearchboxHelper`);
-
     const tags = this.reduce(this.tagsFilter.reduced);
     this.tags.setTags(tags, false, false);
     this.render();
   }
   render() {
-    console.debug(`[RENDER] (${this.type}) SearchboxHelper`);
-
-    const tags     = this.tags.list;
-    const maxItems = 30;
+    const tags        = this.tags.list;
+    // const nbTags      = tags.length;
+    const itemsPerCol = 10;
+    const maxCols     = 3;
+    const maxItems    = itemsPerCol * maxCols;
 
     this.emptyDropdown();
-    /* TODO Choose between functional OR native loops
-     * while & .shift()
-     */
-    while (tags.length > 0 && this.menu.childElementCount < maxItems) {
-      const tag  = tags.shift();
-      const item = this.itemFactory(tag);
-      this.menu.appendChild(item);
-    }
+
+    const displayedItems = reduce(tags, (items, tag) => items.length < maxItems ? [...items, tag] : items, []);
+    forEach(displayedItems, (tag) => this.menu.appendChild(this.itemFactory(tag)));
   }
 
   init() {
-    console.debug(`[INIT] (${this.type}) SearchboxHelper`);
-
     this.Dropdown = window.bootstrap.Dropdown.getOrCreateInstance(this.button);
 
     this.button.addEventListener("hide.bs.dropdown", (event) => {
       if (this.cancelNextHide) {
-        this.cancelNextHide = false;
         event.preventDefault();
+        this.cancelNextHide = false;
       } else {
         this.focus();
       }
@@ -243,6 +242,7 @@ export class SearchboxHelper {
           }
           break;
         default:
+          this.open();
           return;
       }
     });
@@ -264,7 +264,9 @@ export class SearchboxHelper {
           return;
       }
 
-      this.open();
+      if (this.search.length > 0) {
+        this.open();
+      }
     });
     this.input.addEventListener("blur", () => {
       this.close();

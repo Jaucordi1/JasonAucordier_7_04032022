@@ -1,6 +1,6 @@
 import { TagFactory }        from "../factories/tags.js";
 import { TagsDisplayHelper } from "../app/tags.js";
-import { filter, map }       from "../utils/array.js";
+import { filter, map, some } from "../utils/array.js";
 
 export class TagsFilter {
   /**
@@ -26,7 +26,7 @@ export class TagsFilter {
    */
   tagFactory(tag) {
     const tagEl = TagFactory.getTagDOM(tag);
-    tagEl.addEventListener("click", (event) => this.remove(tag));
+    tagEl.addEventListener("click", () => this.remove(tag));
     return tagEl;
   }
 
@@ -49,17 +49,13 @@ export class TagsFilter {
    * @return {IRecipe[]}
    */
   reduce(recipes) {
-    console.debug("[REDUCE] TagsFilter");
-
     if (this.tagsDisplayHelper.tags.count === 0) return map(recipes, r => r);
 
     const tags = this.tagsDisplayHelper.tags.list;
-    return filter(recipes, (recipe) => tags.some((tag) => tag.describeRecipe(recipe)));
+    return filter(recipes, (recipe) => some(tags, (tag) => tag.describeRecipe(recipe)));
   }
 
   update() {
-    console.debug("[UPDATE] TagsFilter");
-
     const oldFiltered = this.filtered;
     const nbBefore    = this.reduced.length;
 
@@ -72,8 +68,6 @@ export class TagsFilter {
   }
 
   init() {
-    console.debug("[INIT] TagsFilter");
-
     this.reduced = map(this.app.search.reduced, r => r);
   }
 }

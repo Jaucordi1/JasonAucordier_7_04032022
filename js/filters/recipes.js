@@ -52,8 +52,6 @@ export class RecipesFilter {
   }
 
   update() {
-    console.debug("[UPDATE] RecipesHelper");
-
     const nbBefore    = this.displayed.length;
     const oldFiltered = this.filtered;
 
@@ -66,8 +64,6 @@ export class RecipesFilter {
     if (hasChanged) this.render();
   }
   render() {
-    console.debug("[RENDER] RecipesHelper");
-
     this.clear();
 
     forEach(this.displayed, (recipe, idx) => {
@@ -100,8 +96,6 @@ export class RecipesFilter {
   }
 
   async init() {
-    console.debug("[INIT] RecipesHelper");
-
     this.all = await loadRecipes();
   }
 }

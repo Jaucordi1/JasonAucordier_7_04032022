@@ -1,5 +1,5 @@
-import { replaceAccentuedChars }                 from "../utils.js";
-import { find, findIndex, forEach, map, splice } from "../utils/array.js";
+import { replaceAccentuedChars }                       from "../utils/strings.js";
+import { find, findIndex, forEach, map, some, splice } from "../utils/array.js";
 
 // DONE
 export const TagType = Object.seal(Object.freeze({
@@ -43,12 +43,12 @@ export class Tag {
   describeRecipe(recipe) {
     switch (this.type) {
       case TagType.INGREDIENT:
-        return recipe.ingredients.some(({ ingredient }) => {
+        return some(recipe.ingredients, ({ ingredient }) => {
           const term = replaceAccentuedChars(ingredient).toLowerCase();
           return term === this.value;
         });
       case TagType.USTENSIL:
-        return recipe.ustensils.some((ustensil) => {
+        return some(recipe.ustensils, (ustensil) => {
           const term = replaceAccentuedChars(ustensil).toLowerCase();
           return term === this.value;
         });
