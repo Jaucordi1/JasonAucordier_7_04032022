@@ -73,7 +73,9 @@ class SearchboxHelper {
     this.Dropdown.show();
   }
   close() {
-    if (!this.opened) return;
+    if (!this.opened) {
+      return;
+    }
     if (this.cancelNextHide) {
       this.cancelNextHide = false;
       return;
@@ -226,7 +228,7 @@ class SearchboxHelper {
                                   ? this.container.parentElement.previousElementSibling?.firstElementChild
                                   : this.container.parentElement.nextElementSibling?.firstElementChild;
           if (nextSearchboxEl) {
-            // Focusing next (or previous) searchbox
+            // Focusing next/previous searchbox
             event.preventDefault();
             const type = split(nextSearchboxEl.id, "-")[1];
             if (includes(Object.values(TagType), type)) {
