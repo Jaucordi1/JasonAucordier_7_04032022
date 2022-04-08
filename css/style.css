@@ -1,7 +1,16 @@
 *::placeholder,
 #recipes,
 body > header {
-	user-select: none;
+	user-select : none;
+}
+
+html, body {
+	height   : 100vh;
+	overflow : hidden;
+}
+body {
+	display   : flex;
+	flex-flow : column nowrap;
 }
 
 .search-dropdown {
@@ -18,6 +27,29 @@ body > header {
 	align-items     : stretch;
 }
 
+main {
+	flex-grow : 1;
+	display   : flex;
+	height    : 80vh;
+	flex-flow : column nowrap;
+	overflow  : hidden;
+}
+
+.no-recipes {
+	display         : flex;
+	flex-flow       : column nowrap;
+	justify-content : center;
+	align-items     : center;
+
+	font-size       : 2em;
+	align-self: center;
+	width: 100% !important;
+}
+
+pre {
+	white-space : break-spaces;
+}
+
 .form-control:focus,
 button:focus {
 	box-shadow : none !important;
@@ -25,8 +57,8 @@ button:focus {
 }
 
 #tags > .row > * {
-	flex-grow: 1;
-	width: auto;
+	flex-grow : 1;
+	width     : auto;
 }
 
 .searchbox > .input-group {
@@ -59,20 +91,33 @@ button:focus {
 .searchbox .dropdown-menu .dropdown-item {
 	color  : var(--bs-white);
 	cursor : pointer;
-	width: auto;
+	width  : auto;
 }
 .searchbox .dropdown-menu .dropdown-item:is(:hover, .active) {
-	color : var(--bs-black);
-	background-color: #e9ecef;
+	color            : var(--bs-black);
+	background-color : #E9ECEF;
 }
 
+body > header {
+	height : 20vh;
+}
+#recipes {
+	flex-grow  : 1;
+	overflow-y : auto;
+	display    : flex;
+	flex-flow  : row wrap;
+	column-gap : 1em;
+}
+#recipes > * {
+	width : calc(33% - .7em);
+}
 #recipes .card {
-	background-color: #E7E7E7;
-	border: none;
-	height: 500px;
-	font-size: .9em;
+	background-color : #E7E7E7;
+	border           : none;
+	height           : 500px;
+	font-size        : .9em;
 }
 
 .bi.bi-clock.bi-clock-bold::before {
-	font-weight: bold !important;
+	font-weight : bold !important;
 }

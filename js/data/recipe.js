@@ -1,3 +1,5 @@
+import { getRandomIntInRange}   from "../utils/numbers.js";
+
 export class Recipe {
   /**
    * @param {IRecipe} data
@@ -29,6 +31,11 @@ export class Recipe {
   }
   get appliance() {
     return this._data.appliance;
+  }
+
+  get randomIngredient() {
+    const randIdx = getRandomIntInRange(0, this.ingredients.length - 1);
+    return this.ingredients[randIdx];
   }
 
   /**

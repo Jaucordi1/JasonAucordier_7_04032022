@@ -100,8 +100,7 @@ export function recipeFactory(recipe) {
 
   function getColumnDOM() {
     const colEl = document.createElement("div");
-    colEl.classList.add("col-4");
-    // colEl.setAttribute('href', '#');
+    colEl.classList.add("mb-3");
 
     return colEl;
   }
@@ -133,5 +132,5 @@ export function recipeFactory(recipe) {
     return colEl;
   }
 
-  return { getRecipeCardDOM };
+  return { getRecipeCardDOM, getColumnDOM };
 }
