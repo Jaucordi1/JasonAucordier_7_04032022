@@ -45,9 +45,10 @@ class SearchboxHelper {
 
     item.addEventListener("click", (event) => {
       event.preventDefault();
-      this.cancelNextHide = true;
+      this.cancelNextHide = this.opened;
       this.resetInput();
       this.tagsFilter.add(tag);
+      this.close();
     });
     item.addEventListener("mouseover", (event) => {
       const activeItem = find(Array.from(this.menu.children), element => element.classList.contains("active"));
