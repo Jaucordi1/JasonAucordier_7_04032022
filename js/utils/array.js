@@ -5,23 +5,70 @@
  * @returns {Array}
  */
 export function filter(array, iterator, thisArgs = undefined) {
-  return array.filter(iterator, thisArgs);
+  if (array.length === 0) {
+    return [];
+  }
+  const newArr = [];
+  const func   = thisArgs !== undefined ? iterator.bind(thisArgs) : iterator;
+  for (const item of array) {
+    if (func(item) === true) {
+      newArr.push(item);
+    }
+  }
+  return newArr;
 }
 
 export function map(array, mapper, thisArgs = undefined) {
-  return array.map(mapper, thisArgs);
+  if (array.length === 0) {
+    return [];
+  }
+  const newArr = [];
+  const func   = thisArgs !== undefined ? mapper.bind(thisArgs) : mapper;
+  for (const item of array) {
+    newArr.push(func(item));
+  }
+  return newArr;
 }
 
 export function forEach(array, callback, thisArgs = undefined) {
-  array.forEach(callback, thisArgs);
+  if (array.length > 0) {
+    const func = thisArgs !== undefined ? callback.bind(thisArgs) : callback;
+    for (const item of array) {
+      func(item);
+    }
+  }
 }
 
 export function reduce(array, reducer, initialValue) {
-  return array.reduce(reducer, initialValue);
+  const arrayLength = array.length;
+  if (arrayLength === 0) {
+    return initialValue;
+  }
+
+  let result = initialValue, i = 0;
+  do {
+    result = reducer(result, array[i], i++, array);
+  } while (i < arrayLength);
+
+  return result;
 }
 
 export function find(array, finder, thisArgs = undefined) {
-  return array.find(finder, thisArgs);
+  if (array.length === 0) {
+    return;
+  }
+
+  const func = thisArgs !== undefined ? finder.bind(thisArgs) : finder;
+
+  let found = undefined, i = 0;
+  do {
+    const item = array[i++];
+    if (func(item) === true) {
+      found = item;
+    }
+  } while (!found && i < array.length - 1);
+
+  return found;
 }
 
 /**
@@ -31,16 +78,62 @@ export function find(array, finder, thisArgs = undefined) {
  * @returns {number}
  */
 export function findIndex(array, finder, thisArgs = undefined) {
-  return array.findIndex(finder, thisArgs);
+  if (array.length === 0) {
+    return -1;
+  }
+
+  const func = thisArgs !== undefined ? finder.bind(thisArgs) : finder;
+
+  let found = -1, i = -1;
+  do {
+    const item = array[++i];
+    if (func(item) === true) {
+      found = i;
+    }
+  } while (found < 0 && i < array.length - 1);
+
+  return found;
 }
 
-export function splice(array, index, deleteCount = undefined, items = []) {
-  if (items.length === 0)
-    return array.splice(index, deleteCount);
-  else
-    return array.splice(index, deleteCount, items);
+export function splice(array, start, deleteCount = undefined, items = []) {
+  let i;
+  const arrayLength = array.length;
+  const result      = [];
+  const removed     = [];
+
+  if (deleteCount < 0) {
+    deleteCount = 0;
+  }
+  if (deleteCount > (arrayLength - start)) {
+    deleteCount = (arrayLength - start);
+  }
+
+  // Before start
+  for (i = 0; i < start; i++) {
+    result.push(array[i]);
+  }
+
+  // Delete items
+  for (i = start; i < start + deleteCount; i++) {
+    removed.push(array[i]);
+  }
+
+  // Add after
+  for (i = start + (deleteCount || 0); i < arrayLength; i++) {
+    result.push(array[i]);
+  }
+
+  // Modify original array
+  array.length = 0;
+  i            = result.length;
+  while (i--) {
+    array[i] = result[i];
+  }
+
+  return removed;
 }
 
+// TODO
 /**
  * @param {string} str
  * @param {string} splitter
@@ -52,7 +145,20 @@ export function split(str, splitter, limit = undefined) {
 }
 
 export function join(array, glue) {
-  return array.join(glue);
+  const arrayLength = array.length;
+  if (arrayLength === 0) {
+    return "";
+  }
+  if (arrayLength === 1) {
+    return array[0];
+  }
+
+  let str = array[0], i = 1;
+  for (; i < arrayLength - 1; i++) {
+    str += `${glue}${array[i]}`;
+  }
+
+  return str;
 }
 
 /**
@@ -61,17 +167,20 @@ export function join(array, glue) {
  * @param {number | undefined} fromIndex
  * @returns {boolean}
  */
-export function includes(array, item, fromIndex = undefined) {
-  return array.includes(item, fromIndex);
-}
+export function includes(array, item, fromIndex = 0) {
+  const arrayLength = array.length;
+  if (arrayLength === 0) {
+    return false;
+  }
 
-/**
- * @param {Array} array
- * @param {(a: *, b: *) => (-1 | 0 | 1)} sorter
- * @returns {Array}
- */
-export function sort(array, sorter) {
-  return array.sort(sorter);
+  let found = false, i = fromIndex;
+  do {
+    if (array[i] === item) {
+      found = true;
+    }
+  } while (!found && i < arrayLength - 1);
+
+  return found;
 }
 
 /**
@@ -81,7 +190,19 @@ export function sort(array, sorter) {
  * @returns {boolean}
  */
 export function some(array, predicate, thisArg = undefined) {
-  return array.some(predicate, thisArg);
+  const arrayLength = array.length;
+  if (arrayLength === 0) {
+    return false;
+  }
+
+  const func = thisArg !== undefined ? predicate.bind(thisArg) : predicate;
+
+  let match = false, i = 0;
+  do {
+    match = func(array[i], i++);
+  } while (!match && i < arrayLength);
+
+  return match;
 }
 
 /**
@@ -91,9 +212,20 @@ export function some(array, predicate, thisArg = undefined) {
  * @returns {boolean}
  */
 export function every(array, predicate, thisArg = undefined) {
-  return array.every(predicate, thisArg);
-}
+  const arrayLength = array.length;
+  if (arrayLength === 0) {
+    return false;
+  }
 
+  const func = thisArg !== undefined ? predicate.bind(thisArg) : predicate;
+
+  let match = true, i = 0;
+  do {
+    match = func(array[i], i++);
+  } while (match && i < arrayLength);
+
+  return match;
+}
 
 export function chunkArray(arr, chunkSize = 10) {
   if (arr.length <= chunkSize) return [map(arr, i => i)];
