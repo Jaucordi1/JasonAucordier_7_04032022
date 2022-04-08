@@ -22,24 +22,24 @@
 
 		<main class="container-lg">
 			<form id="filters">
-				<div id="search" class="row">
+				<div class="row" id="search">
 					<div class="col">
 						<div class="input-group mb-3">
-							<input type="text" autofocus class="form-control form-control-lg" aria-describedby="button-addon2"
-							       aria-label="Rechercher une recette" placeholder="Rechercher une recette">
+							<input type="text" class="form-control form-control-lg" aria-label="Rechercher une recette" autofocus
+							       placeholder="Rechercher une recette" />
 							<span class="input-group-text"><i class="bi-search"></i></span>
 						</div>
 					</div>
 				</div>
-				<div id="tags" class="d-flex flex-wrap gap-2 mb-3"></div>
-				<div id="dropdowns" class="row">
+				<div class="d-flex flex-wrap gap-2 mb-3" id="tags"></div>
+				<div class="row" id="dropdowns">
 					<div class="col-2">
 						<!-- DROPDOWN -->
 						<div class="searchbox" id="searchbox-ingredients">
 							<div class="input-group bg-primary rounded px-0 mb-3">
 								<input type="search" class="form-control" aria-label="Ingrédients" placeholder="Ingrédients" />
 								<button class="btn btn-primary btn-lg dropdown-toggle" type="button" aria-expanded="false"
-								        data-bs-toggle="dropdown" data-bs-auto-close="true"></button>
+								        data-bs-auto-close="true" data-bs-toggle="dropdown"></button>
 								<ul class="dropdown-menu dropdown-menu-end bg-primary"></ul>
 							</div>
 						</div>
@@ -50,7 +50,7 @@
 							<div class="input-group bg-success rounded px-0 mb-3">
 								<input type="search" class="form-control" aria-label="Appareils" placeholder="Appareils" />
 								<button class="btn btn-success btn-lg dropdown-toggle" type="button" aria-expanded="false"
-								        data-bs-toggle="dropdown" data-bs-auto-close="true"></button>
+								        data-bs-auto-close="true" data-bs-toggle="dropdown"></button>
 								<ul class="dropdown-menu dropdown-menu-end bg-success"></ul>
 							</div>
 						</div>
@@ -61,14 +61,14 @@
 							<div class="input-group bg-danger rounded px-0 mb-3">
 								<input type="search" class="form-control" aria-label="Ustensiles" placeholder="Ustensiles" />
 								<button class="btn btn-danger btn-lg dropdown-toggle" type="button" aria-expanded="false"
-								        data-bs-toggle="dropdown" data-bs-auto-close="true"></button>
+								        data-bs-auto-close="true" data-bs-toggle="dropdown"></button>
 								<ul class="dropdown-menu dropdown-menu-end bg-danger"></ul>
 							</div>
 						</div>
 					</div>
 				</div>
 			</form>
-			<div id="recipes" class="row row-cols-1 row-cols-md-3 g-5 mb-5"></div>
+			<div class="row row-cols-1 row-cols-md-3 g-5 mb-5" id="recipes"></div>
 		</main>
 
 		<script crossorigin="anonymous" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"
