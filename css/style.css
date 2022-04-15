@@ -30,7 +30,7 @@ body {
 main {
 	flex-grow : 1;
 	display   : flex;
-	height    : 80vh;
+	height    : 85vh;
 	flex-flow : column nowrap;
 	overflow  : hidden;
 }
@@ -99,7 +99,7 @@ button:focus {
 }
 
 body > header {
-	height : 20vh;
+	height : 15vh;
 }
 #recipes {
 	flex-grow  : 1;
