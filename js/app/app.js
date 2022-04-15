@@ -76,13 +76,14 @@ class App {
   }
 
   init() {
-    console.debug("[INIT] Index");
+    console.debug("[INIT] App");
 
     // Init recipes helper
     this.recipes.init()
       .then(() => {
-        console.info("[Index]", "Loaded", this.recipes.all.length, "recipes.");
+        console.info("[App]", "Loaded", this.recipes.all.length, "recipes.");
 
+        console.time("App init");
         // Init search filter
         this.search.init();
         // Init tags filter
@@ -90,11 +91,13 @@ class App {
         // Init searchboxes
         Object.values(TagType).forEach((type) => this.searchboxes[type].init());
 
+        console.timeEnd("App init");
+
         this.recipes.update();
 
-        console.info("[Index] Available.");
+        console.debug("[App] Available.");
       })
-      .catch((err) => console.error("[ERROR] Index :", err));
+      .catch((err) => console.error("[ERROR] App :", err));
   }
 }
 

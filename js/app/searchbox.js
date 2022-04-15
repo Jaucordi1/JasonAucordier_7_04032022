@@ -139,7 +139,10 @@ class SearchboxHelper {
            : filter(tags, searchFilter);
   }
   update() {
+    const logName = `Searchbox filter (${this.type})`;
+    console.time(logName);
     const tags = this.reduce(this.tagsFilter.reduced);
+    console.timeEnd(logName);
     this.tags.setTags(tags, false, false);
     this.render();
   }

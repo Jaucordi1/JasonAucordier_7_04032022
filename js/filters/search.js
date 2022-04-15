@@ -74,7 +74,9 @@ export class SearchFilter {
     const nbBefore    = this.reduced.length;
 
     this.filtered = this.term.length >= 3;
+    console.time("Main search filter");
     this.reduced  = this.reduce(this.app.recipes.all);
+    console.timeEnd("Main search filter");
 
     const hasChanged = this.filtered !== oldFiltered || this.reduced.length !== nbBefore;
     if (hasChanged && notify) {
