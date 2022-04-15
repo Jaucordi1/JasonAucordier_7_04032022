@@ -61,7 +61,9 @@ export class TagsFilter {
     const oldFiltered = this.filtered;
     const nbBefore    = this.reduced.length;
 
+    console.time("Tags filter");
     this.reduced  = this.reduce(this.app.search.reduced);
+    console.timeEnd("Tags filter");
     this.filtered = this.app.search.reduced.length !== this.reduced.length;
 
     if (this.reduced.length !== nbBefore || this.filtered !== oldFiltered) {
